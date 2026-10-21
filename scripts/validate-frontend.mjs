@@ -17,7 +17,9 @@ function report(file, message) {
   failures.push(`${relative(repositoryRoot, file)}: ${message}`);
 }
 
-const files = walk(frontendRoot).filter((file) => supportedExtensions.has(extname(file))).filter((file) => !file.includes("/vendor/"));
+const files = walk(frontendRoot)
+  .filter((file) => supportedExtensions.has(extname(file)))
+  .filter((file) => !relative(frontendRoot, file).split(/[\\/]/).includes("vendor"));
 const htmlFiles = files.filter((file) => extname(file) === ".html");
 
 for (const file of files) {

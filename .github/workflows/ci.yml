@@ -26,15 +26,11 @@ jobs:
       run: node scripts/validate-frontend.mjs
     - name: Check JavaScript syntax
       run: find frontend -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+    - name: Test XLM amount validation
+      run: node --test scripts/tests/xlm-to-stroops.test.mjs
     - name: Reject tracked secrets and deployment outputs
       shell: bash
       run: "prohibited=$(git ls-files | grep -E '(^|/)(\\.env|\\.deploy\\.env|deploy-output\\\
         .json|deploy-mainnet-output\\.json)$' || true)\nif [ -n \"$prohibited\" ];\
         \ then\n  echo \"Sensitive or generated deployment files are tracked:\"\n\
         \  echo \"$prohibited\"\n  exit 1\nfi\n"
-    - name: Check out repository
-      uses: actions/checkout@v4
-    - name: Set up Node.js
-      uses: actions/setup-node@v7
-      with:
-        node-version: 22
