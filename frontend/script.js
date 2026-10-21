@@ -1,10 +1,8 @@
-import { placeBet, reducePosition, checkTransactionStatus } from "./soroban.js";
 import { fetchJson } from "./fetch.js";
 import { TESTNET, placeBet, reducePosition, checkTransactionStatus } from "./soroban.js";
 
 const contractExplorer = document.querySelector("[data-contract-explorer]");
 if (contractExplorer) contractExplorer.href = `https://stellar.expert/explorer/testnet/contract/${TESTNET.predictionMarketContract}`;
-import { placeBet, reducePosition, checkTransactionStatus, TESTNET } from "./soroban.js";
 
 const HORIZON_URL = "https://horizon.stellar.org";
 const COINGECKO_URL = "https://api.coingecko.com/api/v3";
@@ -21,7 +19,7 @@ function canonicalExplorerUrl(value) {
 }
 
 const state = { price: null, change: null, selectedMarket: 0, action: "buy", outcome: "yes", positions: [] };
-const baseMarkets = [
+export const baseMarkets = [
   { marketId: 3, category: "crypto", title: "Will XLM close above $0.50 by September 30, 2026?", detail: "Deployed Stellar Testnet market #3. Its published close date has passed; the app does not read current settlement state.", yes: 50, volume: "Closed · Testnet", close: "Closed Sep 30, 2026", onchainId: 3, acceptingPositions: false },
   { marketId: "concept-1", category: "network", title: "Will Stellar pass 70 million ledgers this year?", detail: "Product concept. Resolution criteria, oracle, and onchain market are not configured.", yes: 68, volume: "Concept", close: "Example" },
   { marketId: "concept-2", category: "network", title: "Will average ledger close stay below 6 seconds?", detail: "Product concept. Resolution criteria, oracle, and onchain market are not configured.", yes: 76, volume: "Concept", close: "Example" },
@@ -43,8 +41,6 @@ function loadPositions() {
     const knownMarketIds = new Set(baseMarkets.map((market) => market.marketId));
     return saved.filter((position) => {
       if (!position || typeof position !== "object") return false;
-      const validExplorer = !position.explorerUrl
-        || (typeof position.explorerUrl === "string" && parseTransactionHash(position.explorerUrl) !== null);
       const validExplorer = position.explorerUrl === undefined || position.explorerUrl === ""
         || canonicalExplorerUrl(position.explorerUrl) === position.explorerUrl;
       const validStatus = !position.status || ["pending", "confirmed", "failed"].includes(position.status);
@@ -251,15 +247,6 @@ function selectMarket(index, scroll = true) {
 function renderPositions() {
   if (!state.positions.length) return;
   $("#position-list").innerHTML = state.positions.map((position) => {
-    const validHash = parseTransactionHash(position.explorerUrl);
-    const explorerLink = validHash ? `${TESTNET_EXPLORER_PREFIX}${validHash}` : null;
-    let result;
-    if (position.status === "pending") {
-      result = `<a class="position-result pending" href="${explorerLink || '#'}" target="_blank" rel="noreferrer">Pending <svg><use href="#i-external" /></svg></a>`;
-    } else if (position.status === "failed") {
-      result = '<span class="position-result failed">Failed</span>';
-    } else if (explorerLink) {
-      result = `<a class="position-result onchain" href="${explorerLink}" target="_blank" rel="noreferrer">Confirmed <svg><use href="#i-external" /></svg></a>`;
     const explorerUrl = canonicalExplorerUrl(position.explorerUrl);
     let result;
     if (position.status === "pending") {
@@ -301,11 +288,6 @@ function reconcilePendingPosition(position) {
   if (!position?.hash || position.status !== "pending" || activeReconciliations.has(position)) return;
   activeReconciliations.add(position);
   let attempts = 0;
-  const pollTimer = setInterval(async () => {
-    if (document.hidden) return;
-    attempts += 1;
-    if (attempts > 30 || position.status !== "pending") {
-      clearInterval(pollTimer);
   let pollTimer = null;
   let pollActive = false;
 
@@ -607,38 +589,6 @@ renderMarkets();
 selectMarket(0, false);
 renderPositions();
 state.positions.filter((p) => p.status === "pending" && p.hash).forEach(reconcilePendingPosition);
-let networkInterval = null;
-let priceInterval = null;
-
-function startPolling() {
-  if (!networkInterval) networkInterval = setInterval(updateNetwork, 10000);
-  if (!priceInterval) priceInterval = setInterval(updatePrice, 60000);
-}
-
-function stopPolling() {
-  if (networkInterval) {
-    clearInterval(networkInterval);
-    networkInterval = null;
-  }
-  if (priceInterval) {
-    clearInterval(priceInterval);
-    priceInterval = null;
-  }
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) {
-    stopPolling();
-  } else {
-    updateNetwork();
-    updatePrice();
-    startPolling();
-  }
-});
-
-updateNetwork();
-updatePrice();
-startPolling();
 // Background tabs should not spend public Horizon or CoinGecko rate limits.
 let networkPollTimer = null;
 let pricePollTimer = null;

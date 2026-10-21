@@ -1,0 +1,13 @@
+{
+  "name": "augora-frontend-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --test scripts/tests/submit-order-guards.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

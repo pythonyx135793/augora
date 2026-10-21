@@ -135,3 +135,9 @@ Copy `.env.example` to `.env` and fill in your values (see the file for inline d
 ## Security, data, and license
 
 Never commit `.deploy.env`, secret keys, recovery phrases, wallet identities, or generated deployment output. The app asks Freighter to sign transactions and does not handle secret keys. Testnet software and assets are experimental and have no mainnet value. This project is not audited or intended for production financial use. Augora source code is licensed under MIT; bundled third-party fonts retain their own licenses and notices.
+
+## Frontend wallet-guard regression tests
+
+Install development-only dependencies with `npm ci --ignore-scripts --no-audit --no-fund`, then run `npm test` on Node.js 22.23.3 or later (CI uses Node 22). The suite uses JSDOM with the real home-page markup and application module. Native `node:test` module mocks replace the Soroban and public-data imports before the app loads; no network, wallet extension, signing, Testnet funds, or contract deployment is used.
+
+The command explicitly selects the wallet-guard suite. Bare `node --test` on Node 24 also discovers an unrelated existing TypeScript test whose extensionless import needs its own runner configuration.
