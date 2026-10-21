@@ -22,6 +22,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 22
+    - name: Install test dependencies
+      run: npm ci --ignore-scripts --no-audit --no-fund
+    - name: Test market filter events
+      run: node --test scripts/tests/market-filter.test.mjs
     - name: Validate pages and local assets
       run: node scripts/validate-frontend.mjs
     - name: Check JavaScript syntax
@@ -32,9 +36,3 @@ jobs:
         .json|deploy-mainnet-output\\.json)$' || true)\nif [ -n \"$prohibited\" ];\
         \ then\n  echo \"Sensitive or generated deployment files are tracked:\"\n\
         \  echo \"$prohibited\"\n  exit 1\nfi\n"
-    - name: Check out repository
-      uses: actions/checkout@v4
-    - name: Set up Node.js
-      uses: actions/setup-node@v7
-      with:
-        node-version: 22

@@ -112,6 +112,15 @@ cargo build --release --target wasm32v1-none -p prediction_market
 
 The frontend CI uses Node.js 22 to validate HTML pages, local assets, and JavaScript syntax. The contract repository has its own CI workflow for checks, tests, WASM builds, and invariant tests. If you change payout math, fees, storage lifetimes, or reward flows, update the tests and invariant matrix with the implementation.
 
+Frontend regression tests use Node.js 22 or newer and JSDOM. Install the locked development dependencies and run the frontend test suite with:
+
+```bash
+npm ci --ignore-scripts --no-audit --no-fund
+npm test
+```
+
+The tests load the real home-page markup and application module, exercise the filter buttons, and block external network and wallet calls. Serving the browser app does not require installing these test dependencies.
+
 ## Roadmap and contributor opportunities
 
 The next work should make the prototype more useful and easier to evaluate:
