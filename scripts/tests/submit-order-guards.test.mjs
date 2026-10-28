@@ -52,13 +52,13 @@ async function loadPage(t, { balance = 200, address = "TEST-WALLET", deferred = 
   const checkTransactionStatus = t.mock.fn(block("transaction polling"));
   // Register mocks BEFORE the production module imports these dependencies.
   // No production global injection hook or real SDK/wallet import is needed.
-  t.mock.module(new URL("../../frontend/soroban.js", import.meta.url), {
+  t.mock.module(new URL("../../frontend/soroban.js", import.meta.url).href, {
     namedExports: {
       TESTNET: { predictionMarketContract: "TEST-CONTRACT", explorerUrl: "https://stellar.expert/explorer/testnet/tx" },
       placeBet, reducePosition, checkTransactionStatus,
     },
   });
-  t.mock.module(new URL("../../frontend/fetch.js", import.meta.url), {
+  t.mock.module(new URL("../../frontend/fetch.js", import.meta.url).href, {
     namedExports: { fetchJson: block("public data request") },
   });
 
